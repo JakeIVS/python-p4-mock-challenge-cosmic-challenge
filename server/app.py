@@ -90,10 +90,27 @@ class Planets(Resource):
             }
             planet_index.append(planet_dict)
         return make_response(planet_index, 200)
+    
+
+class Missions(Resource):
+    def post(self):
+        data = request.get_json()
+
+        new_mission = Mission(
+            name = data['name'],
+            scientist_id = data['scientist_id'],
+            planet_id = data['planet_id']
+        )
+
+        db.session.add(new_mission)
+        db.session.commit()
+
+        return make_response(new_mission.to_dict(), 201)
 
 api.add_resource(Scientists, '/scientists')
 api.add_resource(IndividualScientist, '/scientists/<int:id>')
 api.add_resource(Planets, '/planets')
+api.add_resource(Missions, '/missions')
 
 
 if __name__ == '__main__':
