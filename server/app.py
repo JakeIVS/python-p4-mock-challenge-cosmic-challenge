@@ -37,16 +37,63 @@ class Scientists(Resource):
             }
             scientist_index.append(sci_dict)
         return make_response(scientist_index, 200)
+    
+    def post(self):
+        data=request.get_json()
+
+        new_scientist = Scientist(
+            name= data['name'],
+            field_of_study= data['field_of_study']
+        )
+
+        db.session.add(new_scientist)
+        db.session.commit()
+
+        return make_response(new_scientist.to_dict(), 201)
+
 
 class IndividualScientist(Resource):
     def get(self, id):
-        return make_response(
-            Scientist.query.filter(Scientist.id == id).first().to_dict(),
-            200
-        )
+        scientist = Scientist.query.filter(Scientist.id == id).first()
+        if scientist:
+            return make_response(scientist.to_dict(), 200)
+        return make_response({'error': 'Scientist not found'}, 400)
+    
+    def patch(self, id):
+        scientist = Scientist.query.filter(Scientist.id == id).first()
+        data = request.get_json()
+        for attr in data:
+            setattr(scientist, attr, data[attr])
+        db.session.add(scientist)
+        db.session.commit()
+        response = scientist.to_dict()
+        return make_response(response, 200)
+    
+    def delete(self, id):
+        scientist = Scientist.query.filter(Scientist.id == id).first()
+        if scientist:
+            db.session.delete(scientist)
+            db.session.commit()
+            return make_response({}, 200)
+        return make_response({'error': 'Scientist not found'}, 404)
+
+
+class Planets(Resource):
+    def get(self):
+        planet_index = []
+        for planet in Planet.query.all():
+            planet_dict = {
+                "id": planet.id,
+                "name": planet.name,
+                "distance_from_earth": planet.distance_from_earth,
+                "nearest_star": planet.nearest_star
+            }
+            planet_index.append(planet_dict)
+        return make_response(planet_index, 200)
 
 api.add_resource(Scientists, '/scientists')
 api.add_resource(IndividualScientist, '/scientists/<int:id>')
+api.add_resource(Planets, '/planets')
 
 
 if __name__ == '__main__':
