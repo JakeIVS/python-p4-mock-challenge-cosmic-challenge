@@ -20,10 +20,33 @@ migrate = Migrate(app, db)
 
 db.init_app(app)
 
+api = Api(app)
 
 @app.route('/')
 def home():
     return ''
+
+class Scientists(Resource):
+    def get(self):
+        scientist_index = []
+        for scientist in Scientist.query.all():
+            sci_dict = {
+                'id': scientist.id,
+                'name': scientist.name,
+                'field_of_study': scientist.field_of_study
+            }
+            scientist_index.append(sci_dict)
+        return make_response(scientist_index, 200)
+
+class IndividualScientist(Resource):
+    def get(self, id):
+        return make_response(
+            Scientist.query.filter(Scientist.id == id).first().to_dict(),
+            200
+        )
+
+api.add_resource(Scientists, '/scientists')
+api.add_resource(IndividualScientist, '/scientists/<int:id>')
 
 
 if __name__ == '__main__':

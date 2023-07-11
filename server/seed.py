@@ -74,4 +74,6 @@ if __name__ == '__main__':
         db.session.add_all(missions)
         db.session.commit()
 
+        print(scientists[0].to_dict())
+
         print("Done seeding!")
